@@ -9,4 +9,5 @@ suite "watermelon":
   test "NO":
     for i in countUp(1, 99, 2):
       check watermelon(i) == "NO"
+    check watermelon(2) == "NO"
     
