@@ -1,0 +1,2 @@
+--run
+--threads:on
