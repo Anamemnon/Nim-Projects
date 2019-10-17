@@ -1,14 +1,30 @@
-import os
-import threadpool
+import os, threadpool, asyncdispatch, asyncnet
+import protocol
+
+proc connect(socket: AsyncSocket, sereverAddr: string) {.async.} =
+  echo("Connecting to ", sereverAddr)
+  await socket.connect(sereverAddr, 7687.Port)
+  echo("Connected!")
+
+  while true:
+    let line = await socket.recvLine()
+    let parsed = parseMessage(line)
+    echo(parsed.username, " said ", parsed.message)
 
 echo("Chat application started")
-
 if paramCount() == 0:
   quit("Please specify the server address, e.g. ./client localhost")
-
 let sereverAddr = paramStr(1)
-echo("Connecting to ", sereverAddr)
+var socket = newAsyncSocket()
+
+asyncCheck connect(socket, sereverAddr)
+
+var messageFlowVar = spawn stdin.readLine()
 
 while true:
-  let message = spawn readLine(stdin)
-  echo("Sending \"", ^message, "\"")
+  if messageFlowVar.isReady():
+    let message = createMessage("Anonymous", ^messageFlowVar)
+    asyncCheck socket.send(message)
+    messageFlowVar = spawn stdin.readLine()
+  
+  asyncdispatch.poll()
