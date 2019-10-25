@@ -15,7 +15,35 @@ type
   Database* = ref object
     db: DbConn
 
-proc newDataBase*(filename = "tweeter.db"): Database =
+proc close*(database: Database) =
+  database.db.close()
+
+proc setup*(database: Database) =
+  database.db.exec(sql"""
+    CREATE TABLE IF NOT EXISTS User(
+      usernamem text PRIMARY KEY
+    );
+  """)
+
+  database.db.exec(sql"""
+    CREATE TABLE IF NOT EXISTS Following(
+      follower text,
+      dollowed_user text,
+      PRIMARY KEY (follower, followed_user),
+      PRIMARY KEY (follower), REFERENCES User(username)
+    );
+  """)
+
+  database.db.exec(sql"""
+    CREATE TABLE IF NOT EXISTS Message(
+      username text,
+      time integer,
+      msg text NOT NULL,
+      FOREIGN KEY (username) REFERENCES User(username)
+    );
+  """)
+
+proc newDatabase*(filename = "tweeter.db"): Database =
   new result
   result.db = open(filename, "", "", "")
 
