@@ -21,16 +21,17 @@ proc close*(database: Database) =
 proc setup*(database: Database) =
   database.db.exec(sql"""
     CREATE TABLE IF NOT EXISTS User(
-      usernamem text PRIMARY KEY
+      username text PRIMARY KEY
     );
   """)
 
   database.db.exec(sql"""
     CREATE TABLE IF NOT EXISTS Following(
       follower text,
-      dollowed_user text,
+      followed_user text,
       PRIMARY KEY (follower, followed_user),
-      PRIMARY KEY (follower), REFERENCES User(username)
+      FOREIGN KEY (follower) REFERENCES User(username),
+      FOREIGN KEY (followed_user) REFERENCES User(username)
     );
   """)
 
@@ -51,11 +52,11 @@ proc post*(database: Database, message: Message) =
   if message.msg.len > 140:
     raise newException(ValueError, "Message has to be less than 140 characters.")
   database.db.exec(sql"INSERT INTO Message VALUES (?, ?, ?);", message.username, 
-  $message.time.toUnix().int, message.msg)
+    $message.time.toUnix().int, message.msg)
 
 proc follow*(database: Database, follower: User, user: User) =
-  database.db.exec(sql"INSERT INTO Following VALUES (?, ?, ?);", follower.username,
-  user.username)
+  database.db.exec(sql"INSERT INTO Following VALUES (?, ?);", 
+  follower.username, user.username)
 
 proc create*(database: Database, user: User) =
   database.db.exec(sql"INSERT INTO User VALUES (?);", user.username)
