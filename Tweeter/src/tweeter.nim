@@ -21,4 +21,13 @@ routes:
     setCookie("username", @"username", getTime().getGMTime() + 2.hours)
     redirect("/")
 
+  post "/createMessage":
+    let message = Message(
+      username: @"username",
+      time: getTime(),
+      msg: @"message"
+    )
+    db.post(message)
+    redirect("/")
+
 runForever()
