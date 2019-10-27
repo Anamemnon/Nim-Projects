@@ -18,6 +18,18 @@
       ${body}
     </div>
   </body>
-  
+
 </html>
+#end proc
+#
+#proc renderLogin*(): string =
+#  result = ""
+<div id="login">
+  <span>Login</span>
+  <span class="small">Please type in your username...</span>
+  <form action="login" method="post">
+    <input type="text" name="username">
+    <input type="submit" value="Login">
+  </form>
+</div>
 #end proc
